@@ -184,3 +184,4 @@ dbt/npc_benchmark/dbt_packages/
 benchmark_log.txt
 benchmark_typo_log.txt
 benchmark_leurre_log.txt
+.claude/
