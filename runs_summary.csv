@@ -1,0 +1,6 @@
+file,model,typology,prompt_mode,temperature,status,score,total_gold,turn
+run_deepseek_deepseek-r1-0528-qwen3-8b__aleatoire__20260707_094408_280980.json,deepseek/deepseek-r1-0528-qwen3-8b,aleatoire,,,dead,2,6,15
+run_deepseek_deepseek-r1-0528-qwen3-8b__aleatoire__20260707_094414_920657.json,deepseek/deepseek-r1-0528-qwen3-8b,aleatoire,,,dead,0,6,3
+run_deepseek_deepseek-r1-0528-qwen3-8b__aleatoire__20260707_095515_396515.json,deepseek/deepseek-r1-0528-qwen3-8b,aleatoire,,,dead,0,6,1
+run_deepseek_deepseek-r1-0528-qwen3-8b__aleatoire__20260707_095523_490593.json,deepseek/deepseek-r1-0528-qwen3-8b,aleatoire,,,dead,0,6,2
+run_deepseek_deepseek-r1-0528-qwen3-8b__aleatoire__20260707_100652_523443.json,deepseek/deepseek-r1-0528-qwen3-8b,aleatoire,,,timeout,1,6,20

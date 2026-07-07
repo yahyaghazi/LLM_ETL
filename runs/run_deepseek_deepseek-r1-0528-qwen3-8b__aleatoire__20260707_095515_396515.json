@@ -1,0 +1,101 @@
+{
+  "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+  "typology": "aleatoire",
+  "timestamp": "20260707_095515_396515",
+  "initial_map": [
+    [
+      0,
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      2
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      3,
+      0,
+      2,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      2,
+      0,
+      0,
+      3,
+      3,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      3
+    ]
+  ],
+  "result": {
+    "status": "dead",
+    "score": 0,
+    "total_gold": 6,
+    "turn": 1,
+    "history": [
+      {
+        "turn": 1,
+        "direction": "RIGHT",
+        "reason": "Je dois analyser la grille actuelle du jeu. Le joueur se trouve à la position ligne 0, colonne 6. Il y a un total de 6 pièces d'or restantes sur le plateau. Les ennemis sont désignés par 'E', et il faut les éviter car ils causent la mort.",
+        "event": "enemy"
+      }
+    ]
+  }
+}

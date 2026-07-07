@@ -1,0 +1,113 @@
+{
+  "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+  "typology": "aleatoire",
+  "timestamp": "20260707_094414_920657",
+  "initial_map": [
+    [
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      3,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      2,
+      1,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "result": {
+    "status": "dead",
+    "score": 0,
+    "total_gold": 6,
+    "turn": 3,
+    "history": [
+      {
+        "turn": 1,
+        "direction": "UP",
+        "reason": "Je dois analyser la grille actuelle du jeu. La position du joueur est ligne 6, colonne 2. Il y a six pièces d'or restantes à ramasser. Les ennemis sont dangereux car ils tuent le joueur s'il est touché.",
+        "event": "move"
+      },
+      {
+        "turn": 2,
+        "direction": "UP",
+        "reason": "Je dois analyser la grille actuelle du jeu. La position du joueur est ligne 5, colonne 2. Il y a six pièces d'or restantes à ramasser. Les ennemis sont dangereux car ils causent la mort si touchés.",
+        "event": "move"
+      },
+      {
+        "turn": 3,
+        "direction": "RIGHT",
+        "reason": "Je dois analyser la grille actuelle du jeu. La position du joueur est à la ligne 4, colonne 2. Il y a six pièces d'or restantes sur le plateau. Les ennemis sont désignés par 'E'. Le but est de maximiser les gains tout en minimisant les risques.",
+        "event": "enemy"
+      }
+    ]
+  }
+}

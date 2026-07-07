@@ -1,27 +1,18 @@
 """
 benchmark_runner.py
 ────────────────────
-Harnais de benchmark HEADLESS (sans Pygame/notebook) pour faire jouer
-plusieurs modèles LLM sur des parties indépendantes, et produire des runs
-dans runs/*.json avec exactement le même schéma que npc_brain.ipynb
-(model, final_score, total_gold, turns_used, status, initial_map, optimal,
-decision_log) — pour rester compatible avec le pipeline data (pipeline/).
+Harnais de benchmark HEADLESS pour faire jouer plusieurs modèles LLM
+(via LM Studio / endpoint OpenAI-compatible) sur des parties indépendantes.
 
-Contrairement au notebook (démo interactive avec affichage Pygame), ce
-script sert uniquement à peupler le benchmark multi-modèles : pas de
-viewer, pas de npc_state.json, juste les logs de run.
-
-Les constantes de la grille (VOID/PLAYER/ENEMY/GOLD, MOVES) et le calcul de
-la solution optimale sont importés de npc_solver.py — seule source de
-vérité déjà utilisée par le notebook et le replay, pour garantir la
-cohérence des données entre les deux façons de jouer.
-
-Lancer :
-    python benchmark_runner.py --models mistralai/ministral-3-3b \
-        --typologies aleatoire chemin_bloque piece_leurre --n-games 2 --max-turns 20
+Corrections clés :
+- max_tokens=16000 : le modèle a TOUT le temps de réfléchir PUIS de conclure.
+- Extraction du JSON depuis reasoning_content (là où les modèles "thinking"
+  écrivent réellement leur réponse).
+- Pas de /no_think : la réflexion est libre et encouragée.
+- Timeout HTTP allongé (600s).
+- Grid croisé : modèles × prompts × températures × parties.
 """
 
-import argparse
 import datetime
 import json
 import os
@@ -29,7 +20,6 @@ import re
 import time
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 from dotenv import load_dotenv
@@ -37,12 +27,22 @@ from openai import OpenAI
 from pydantic import BaseModel
 
 from npc_solver import VOID, PLAYER, ENEMY, GOLD, MOVES, optimal_collect
-from map_typologies import make_map, TYPOLOGIES
+from map_typologies import make_map, TYPOLOGIES as ALL_TYPOLOGIES
 
 RUNS_DIR = Path("runs")
 
+DEFAULT_API_URL = "http://localhost:1234/v1"
+DEFAULT_API_TOKEN = "lm-studio"
 
-# ── Contrat de sortie du LLM (identique au notebook, cellule 7) ────────────────
+# Budget de raisonnement LARGE : on ne bride JAMAIS la réflexion.
+MAX_TOKENS = 16000
+# Timeout HTTP généreux : on laisse le temps réel au modèle.
+HTTP_TIMEOUT = 600
+
+DEBUG_LLM = True
+
+
+# ── Contrat de sortie du LLM ───────────────────────────────────────────────────
 class Direction(str, Enum):
     UP = "UP"
     DOWN = "DOWN"
@@ -55,201 +55,460 @@ class PlayerDecision(BaseModel):
     direction: Direction
 
 
-# ── Moteurs (identiques au notebook, cellule 9) ─────────────────────────────────
+# ── Utilitaires carte ───────────────────────────────────────────────────────────
 def localize(world_map, entity):
     return np.argwhere(world_map == entity)
 
 
-def compute_distances(entities_positions, reference_pos):
-    if len(entities_positions) == 0:
-        return np.array([])
-    v = entities_positions - reference_pos
-    return np.round(np.linalg.norm(v, axis=1), 2)
+def player_position(world_map):
+    pos = localize(world_map, PLAYER)
+    return tuple(pos[0]) if len(pos) > 0 else None
 
 
-def allowed_move(world_map, pos):
+def count_gold(world_map):
+    return int(np.sum(world_map == GOLD))
+
+
+def render_map(world_map):
+    symbols = {VOID: ".", PLAYER: "P", ENEMY: "E", GOLD: "G"}
+    lines = []
+    for row in world_map:
+        lines.append(" ".join(symbols.get(int(c), "?") for c in row))
+    return "\n".join(lines)
+
+
+def apply_move(world_map, direction):
+    world_map = world_map.copy()
+    pos = player_position(world_map)
+    if pos is None:
+        return world_map, "wall"
+
     r, c = pos
-    n_rows, n_cols = world_map.shape
-    if r < 0 or c < 0 or r >= n_rows or c >= n_cols:
-        return False
-    return world_map[r, c] in (VOID, GOLD)
+    dr, dc = MOVES[direction]
+    nr, nc = r + dr, c + dc
+
+    if not (0 <= nr < world_map.shape[0] and 0 <= nc < world_map.shape[1]):
+        return world_map, "wall"
+
+    target = world_map[nr, nc]
+    if target == ENEMY:
+        return world_map, "enemy"
+
+    event = "gold" if target == GOLD else "move"
+    world_map[r, c] = VOID
+    world_map[nr, nc] = PLAYER
+    return world_map, event
 
 
-def move(world_map, old_pos, new_pos):
-    if not allowed_move(world_map, new_pos):
-        return tuple(old_pos), False
-    gold_collected = bool(world_map[new_pos[0], new_pos[1]] == GOLD)
-    entity = world_map[old_pos[0], old_pos[1]]
-    world_map[old_pos[0], old_pos[1]] = VOID
-    world_map[new_pos[0], new_pos[1]] = entity
-    return tuple(new_pos), gold_collected
+# ── Prompts ─────────────────────────────────────────────────────────────────────
+def build_prompt(world_map):
+    """Prompt de BASE : vision locale + delta vers l'or le plus proche."""
+    grid = render_map(world_map)
+    pos = player_position(world_map)
+    gold_left = count_gold(world_map)
+
+    gold_coords = localize(world_map, GOLD)
+    hint = ""
+    if len(gold_coords) > 0 and pos is not None:
+        dists = [abs(int(gr) - pos[0]) + abs(int(gc) - pos[1]) for gr, gc in gold_coords]
+        idx = int(np.argmin(dists))
+        gr, gc = gold_coords[idx]
+        dr, dc = int(gr) - pos[0], int(gc) - pos[1]
+        hint = (f"\nL'or le plus proche est à un delta de "
+                f"(lignes: {dr:+d}, colonnes: {dc:+d}) par rapport à toi.")
+
+    return f"""Tu joues à un jeu de collecte d'or sur une grille. Voici la carte :
+
+{grid}
+
+Légende :
+- P = toi (le joueur)
+- G = or à ramasser
+- E = ennemi (MORTEL : tu meurs si tu marches dessus)
+- . = case vide (sûre)
+
+Ta position actuelle : ligne {pos[0]}, colonne {pos[1]}.
+Or restant à collecter : {gold_left}.{hint}
+
+Règles de déplacement (une case à la fois) :
+- UP = monter (ligne - 1)
+- DOWN = descendre (ligne + 1)
+- LEFT = gauche (colonne - 1)
+- RIGHT = droite (colonne + 1)
+
+Objectif : ramasse l'or en évitant les ennemis. Ne marche jamais sur une case E.
+Indique le PROCHAIN déplacement (une seule direction).
+Réponds avec ta raison (reason) et la direction (direction)."""
 
 
-def perception(world_map):
-    player_pos = localize(world_map, PLAYER)[0]
-    golds_pos = localize(world_map, GOLD)
-    golds_dist = compute_distances(golds_pos, player_pos)
+def build_prompt_adventurer(world_map):
+    """Prompt AVENTURIER : vision globale de tout l'or et de tous les ennemis."""
+    grid = render_map(world_map)
+    pos = player_position(world_map)
+    gold_left = count_gold(world_map)
 
-    if len(golds_dist) > 0:
-        nearest_idx = np.argmin(golds_dist)
-        delta = golds_pos[nearest_idx] - player_pos
-        nearest_gold_delta = {"row": int(delta[0]), "col": int(delta[1])}
-    else:
-        nearest_gold_delta = {"row": 0, "col": 0}
+    gold_coords = [tuple(map(int, c)) for c in localize(world_map, GOLD)]
+    enemy_coords = [tuple(map(int, c)) for c in localize(world_map, ENEMY)]
 
-    valid_directions = [
-        name for name, (dr, dc) in MOVES.items()
-        if allowed_move(world_map, (player_pos[0] + dr, player_pos[1] + dc))
-    ]
+    gold_list = ", ".join(f"(ligne {r}, col {c})" for r, c in gold_coords) or "aucun"
+    enemy_list = ", ".join(f"(ligne {r}, col {c})" for r, c in enemy_coords) or "aucun"
 
-    return {
-        "player_pos": [int(player_pos[0]), int(player_pos[1])],
-        "nearest_gold_delta": nearest_gold_delta,
-        "valid_directions": valid_directions,
-        "golds_count": int(len(golds_dist)),
-    }
+    return f"""Tu es un AVENTURIER équipé d'une carte magique qui te donne une VISION
+GLOBALE et en TEMPS RÉEL de tout le territoire. Voici la carte complète :
+
+{grid}
+
+Légende :
+- P = toi (l'aventurier)
+- G = or à ramasser
+- E = camp ennemi (MORTEL : tu meurs instantanément si tu marches dessus)
+- . = case vide (sûre)
+
+Ta position actuelle : ligne {pos[0]}, colonne {pos[1]}.
+Or restant à collecter : {gold_left}.
+
+━━━ VISION GLOBALE (grâce à ta carte) ━━━
+Positions de TOUT l'or : {gold_list}
+Positions de TOUS les camps ennemis : {enemy_list}
+
+Règles de déplacement (une case à la fois) :
+- UP = monter (ligne - 1)
+- DOWN = descendre (ligne + 1)
+- LEFT = gauche (colonne - 1)
+- RIGHT = droite (colonne + 1)
+
+━━━ TA MISSION ━━━
+Exploite ta vision complète de la carte pour PLANIFIER un itinéraire qui :
+1. Récupère la TOTALITÉ de l'or sur la grille.
+2. CONTOURNE systématiquement les camps ennemis : ne marche JAMAIS sur une case E.
+3. Emprunte le chemin le plus court et le plus sûr possible.
+
+Réfléchis d'abord à l'ordre optimal de collecte de l'or et au trajet global, puis
+indique UNIQUEMENT le PROCHAIN déplacement (une seule direction) qui fait avancer
+ton plan. Réponds avec ta raison (reason) et la direction (direction)."""
 
 
-# ── Décision LLM (identique au notebook, cellule 11 ; modèle paramétrable) ────
-def decide(client, model, player_perception, move_history, feedback="") -> Optional[PlayerDecision]:
-    delta = player_perception["nearest_gold_delta"]
-    valid = player_perception["valid_directions"]
+PROMPT_BUILDERS = {
+    "base": build_prompt,
+    "adventurer": build_prompt_adventurer,
+}
 
-    prompt = f"""/no_think
-Tu controles un joueur sur une grille. Objectif : atteindre l'or.
 
-# Ou est l'or le plus proche (par rapport a toi)
-- {abs(delta['row'])} case(s) vers {'le DOWN' if delta['row'] > 0 else 'le UP' if delta['row'] < 0 else '(aligne verticalement)'}
-- {abs(delta['col'])} case(s) vers {'la DROITE' if delta['col'] > 0 else 'la LEFT' if delta['col'] < 0 else '(aligne horizontalement)'}
+# ── Extraction JSON robuste ─────────────────────────────────────────────────────
+def extract_json(text):
+    """Extrait une PlayerDecision depuis un texte libre contenant un objet JSON."""
+    if not text:
+        return None
 
-# Directions ou tu peux avancer (les seules autorisees)
-{valid}
+    candidates = re.findall(r"\{[^{}]*\}", text, flags=re.DOTALL)
+    for cand in reversed(candidates):
+        try:
+            data = json.loads(cand)
+            direction = str(data.get("direction", "")).strip().upper()
+            if direction in Direction.__members__:
+                return PlayerDecision(
+                    reason=str(data.get("reason", "")),
+                    direction=Direction[direction],
+                )
+        except (json.JSONDecodeError, ValueError):
+            continue
 
-# Tes 5 derniers coups
-{move_history[-5:] if move_history else "aucun"}
-{feedback}
+    m = re.search(r"\b(UP|DOWN|LEFT|RIGHT)\b", text.upper())
+    if m:
+        return PlayerDecision(reason=text[:200], direction=Direction[m.group(1)])
 
-# Consignes
-- Choisis UNE direction parmi {valid}.
-- Reduis d'abord le plus grand ecart (vertical ou horizontal).
-- Si tu tournes en rond, essaie une autre direction que d'habitude.
+    return None
 
-Ta reponse : une seule direction."""
 
+def extract_decision(msg):
+    """
+    Récupère la décision où qu'elle soit :
+    1. structured .parsed
+    2. .content classique
+    3. reasoning_content ← POINT CLÉ pour les modèles "thinking"
+    """
+    if getattr(msg, "parsed", None):
+        return msg.parsed
+    if getattr(msg, "content", None):
+        d = extract_json(msg.content)
+        if d:
+            return d
+    reasoning = getattr(msg, "reasoning_content", None)
+    if reasoning:
+        d = extract_json(reasoning)
+        if d:
+            return d
+    return None
+
+
+# ── Debug de la sortie LLM ──────────────────────────────────────────────────────
+def debug_dump_completion(tag, completion):
+    if not DEBUG_LLM:
+        return
     try:
-        response = client.beta.chat.completions.parse(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            response_format=PlayerDecision,
-            temperature=1,
-        )
-        return response.choices[0].message.parsed or None
+        choice = completion.choices[0]
+        msg = choice.message
+        content = getattr(msg, "content", None)
+        parsed = getattr(msg, "parsed", None)
+        reasoning = getattr(msg, "reasoning_content", None)
+        usage = getattr(completion, "usage", None)
+
+        content_len = len(content) if content else 0
+        reasoning_len = len(reasoning) if reasoning else 0
+
+        print(f"  ┌─ [DEBUG {tag}] ──────────────────────────────")
+        print(f"  │ finish_reason   : {choice.finish_reason!r}")
+        print(f"  │ parsed          : {parsed!r}")
+        print(f"  │ content is None : {content is None}")
+        print(f"  │ content len     : {content_len}")
+        print(f"  │ reasoning len   : {reasoning_len}")
+        if usage is not None:
+            print(f"  │ tokens          : prompt={getattr(usage, 'prompt_tokens', '?')} "
+                  f"completion={getattr(usage, 'completion_tokens', '?')} "
+                  f"total={getattr(usage, 'total_tokens', '?')}")
+        if content_len:
+            print(f"  │ content preview : {content[:150]!r}")
+        elif reasoning_len:
+            print(f"  │ reasoning tail  : {reasoning[-150:]!r}")
+        print(f"  └──────────────────────────────────────────────")
     except Exception as e:
-        print(f"[LLM ERROR] {e}")
+        print(f"  [DEBUG] Impossible d'inspecter la completion : {e}")
+
+
+# ── Appels LLM ──────────────────────────────────────────────────────────────────
+# Système SANS /no_think : la réflexion est libre et encouragée.
+SYSTEM_STRUCTURED = (
+    "Tu es un agent de jeu stratégique. Prends tout le temps nécessaire pour "
+    "réfléchir, PUIS termine impérativement par ta décision au format demandé "
+    "(reason + direction)."
+)
+SYSTEM_FALLBACK = (
+    "Tu es un agent de jeu stratégique. Prends tout le temps nécessaire pour "
+    "réfléchir, PUIS termine OBLIGATOIREMENT par un objet JSON valide, seul, au "
+    'format : {"reason": "...", "direction": "UP"} où direction ∈ '
+    "{UP, DOWN, LEFT, RIGHT}."
+)
+
+
+def ask_llm(client, model, world_map, prompt_mode="base", temperature=0.2, retries=2):
+    """Interroge le LLM et retourne une PlayerDecision (ou None)."""
+    prompt = PROMPT_BUILDERS[prompt_mode](world_map)
+
+    for attempt in range(retries + 1):
+        try:
+            completion = client.beta.chat.completions.parse(
+                model=model,
+                messages=[
+                    {"role": "system", "content": SYSTEM_STRUCTURED},
+                    {"role": "user", "content": prompt},
+                ],
+                response_format=PlayerDecision,
+                temperature=temperature,
+                max_tokens=MAX_TOKENS,
+            )
+            debug_dump_completion(f"STRUCTURED attempt={attempt+1}", completion)
+
+            decision = extract_decision(completion.choices[0].message)
+            if decision:
+                return decision
+
+            print(f"  [WARN] Rien d'exploitable (tentative {attempt+1}/{retries+1}), fallback JSON...")
+            decision = ask_llm_fallback(client, model, prompt, temperature=temperature)
+            if decision:
+                return decision
+        except Exception as e:
+            print(f"  [WARN] Échec structuré ({e}), fallback JSON (tentative {attempt+1})...")
+            decision = ask_llm_fallback(client, model, prompt, temperature=temperature)
+            if decision:
+                return decision
+
+    return None
+
+
+def ask_llm_fallback(client, model, prompt, temperature=0.2):
+    """Fallback : parsing JSON robuste, en lisant aussi le reasoning_content."""
+    try:
+        completion = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": SYSTEM_FALLBACK},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=temperature,
+            max_tokens=MAX_TOKENS,
+        )
+        debug_dump_completion("FALLBACK", completion)
+
+        decision = extract_decision(completion.choices[0].message)
+        if decision is None:
+            finish = completion.choices[0].finish_reason
+            print(f"  [ERREUR] Aucun JSON exploitable (finish={finish}).")
+        return decision
+    except Exception as e:
+        print(f"  [ERREUR] Fallback JSON échoué : {e}")
         return None
 
 
-# ── Game loop headless (identique au notebook, cellule 15 ; sans écriture d'état live) ─
-def run_simulation(client, model, initial_map, max_turns=30):
+# ── Simulation ──────────────────────────────────────────────────────────────────
+def run_simulation(client, model, initial_map, prompt_mode="base",
+                   temperature=0.2, max_turns=20):
     world_map = initial_map.copy()
-    move_history, decision_log = [], []
+    total_gold = count_gold(world_map)
     score = 0
-    total_gold = int(np.sum(initial_map == GOLD))
-    status = "running"
-    feedback = ""
     turn = 0
+    status = "in_progress"
+    history = []
 
-    for turn in range(1, max_turns + 1):
-        p = perception(world_map)
-        if p["golds_count"] == 0:
-            status = "won"
+    while turn < max_turns:
+        turn += 1
+
+        if count_gold(world_map) == 0:
+            status = "win"
             break
 
-        decision = decide(client, model, p, move_history, feedback)
+        decision = ask_llm(client, model, world_map,
+                           prompt_mode=prompt_mode, temperature=temperature)
         if decision is None:
-            decision_log.append({"turn": turn, "direction": "?", "reason": "(pas de decision LLM)",
-                                  "blocked": False, "gold": False})
-            continue
+            status = "error_no_decision"
+            break
 
-        dir_str = decision.direction.value
-        reason = decision.reason.strip()
-        player_pos = localize(world_map, PLAYER)[0]
-        old_pos = tuple(player_pos)
-        d_row, d_col = MOVES[dir_str]
-        new_pos = (player_pos[0] + d_row, player_pos[1] + d_col)
-        new_pos, gold_collected = move(world_map, player_pos, new_pos)
-        move_history.append(dir_str)
-        blocked = (new_pos == old_pos)
+        world_map, event = apply_move(world_map, decision.direction.value)
 
-        decision_log.append({
-            "turn": turn, "direction": dir_str, "reason": reason,
-            "blocked": blocked, "gold": bool(gold_collected),
+        history.append({
+            "turn": turn,
+            "direction": decision.direction.value,
+            "reason": decision.reason,
+            "event": event,
         })
 
-        feedback = f"# ATTENTION\nTon dernier coup {dir_str} etait BLOQUE (mur). Change de direction." if blocked else ""
-        if gold_collected:
+        print(f"  Tour {turn}: {decision.direction.value:5s} -> {event}  "
+              f"({decision.reason[:60]})")
+
+        if event == "enemy":
+            status = "dead"
+            break
+        if event == "gold":
             score += 1
-        status = "won" if score >= total_gold else "running"
-        tag = "+OR" if gold_collected else "bloque" if blocked else ""
-        print(f"  [{turn:02d}] {dir_str:7} {tag:8} score={score}/{total_gold}")
-    else:
+            if count_gold(world_map) == 0:
+                status = "win"
+                break
+
+    if status == "in_progress":
         status = "timeout"
 
     return {
-        "world_map": world_map, "score": score, "total_gold": total_gold,
-        "turn": turn, "status": status, "decision_log": decision_log,
+        "status": status,
+        "score": score,
+        "total_gold": total_gold,
+        "turn": turn,
+        "history": history,
     }
 
 
-def save_run_log(model, typology, result, initial_map):
-    safe_model = re.sub(r"[^0-9A-Za-z._-]", "_", model)
-    path = RUNS_DIR / f"run_{safe_model}_{datetime.datetime.now():%Y-%m-%d_%H-%M-%S}.json"
-    optimal = optimal_collect(initial_map)
-    full = {
+# ── Sauvegarde ──────────────────────────────────────────────────────────────────
+def save_run_log(model, typology, result, initial_map, prompt_mode, temperature):
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    safe_model = re.sub(r"[^\w\-.]", "_", model)
+    temp_tag = f"t{temperature:.1f}".replace(".", "")
+    filename = f"{safe_model}__{typology}__{prompt_mode}__{temp_tag}__{timestamp}.json"
+    path = RUNS_DIR / filename
+    payload = {
         "model": model,
         "typology": typology,
-        "final_score": int(result["score"]),
-        "total_gold": int(result["total_gold"]),
-        "turns_used": int(result["turn"]),
-        "status": result["status"],
+        "prompt_mode": prompt_mode,
+        "temperature": temperature,
+        "timestamp": timestamp,
         "initial_map": initial_map.tolist(),
-        "optimal": {"steps": optimal["steps"], "directions": optimal["directions"]},
-        "decision_log": result["decision_log"],
+        "result": result,
     }
-    RUNS_DIR.mkdir(exist_ok=True)
-    path.write_text(json.dumps(full, indent=2, ensure_ascii=False), encoding="utf-8")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
     return path
 
 
+# ── Découverte des modèles ──────────────────────────────────────────────────────
+def get_available_models(client):
+    try:
+        models = client.models.list()
+        return [m.id for m in models.data]
+    except Exception as e:
+        print(f"[ERREUR] Impossible de lister les modèles : {e}")
+        return []
+
+
+# ── Point d'entrée ──────────────────────────────────────────────────────────────
 def main():
-    ap = argparse.ArgumentParser(description="Benchmark headless multi-modèles pour NPC Brain.")
-    ap.add_argument("--models", nargs="+", required=True, help="IDs de modèles (server OpenAI-compatible)")
-    ap.add_argument("--typologies", nargs="+", default=["aleatoire"], choices=list(TYPOLOGIES),
-                     help="Typologies de carte à jouer (cf. map_typologies.py / GAME_DESIGN.md)")
-    ap.add_argument("--n-games", type=int, default=2, help="Parties par (modèle, typologie)")
-    ap.add_argument("--max-turns", type=int, default=20)
-    ap.add_argument("--n-rows", type=int, default=8)
-    ap.add_argument("--n-cols", type=int, default=8)
-    ap.add_argument("--n-gold", type=int, default=6)
-    ap.add_argument("--n-enemy", type=int, default=10)
-    args = ap.parse_args()
+    # ═══════════════════════════════════════════════════════════════════
+    # ⚙️  CONFIGURATION
+    # ═══════════════════════════════════════════════════════════════════
+    TYPOLOGIES = ["aleatoire"]
+    PROMPT_MODES = ["base", "adventurer"]
+    TEMPERATURES = [0.0, 0.3, 0.7, 1.0]
+    N_GAMES = 2
+    MAX_TURNS = 20
+    N_ROWS = 8
+    N_COLS = 8
+    N_GOLD = 6
+    N_ENEMY = 10
+
+    EXCLUDE_EMBEDDINGS = True
+    API_URL = "http://localhost:1234/v1"
+    API_TOKEN = "lm-studio"
+    # ═══════════════════════════════════════════════════════════════════
 
     load_dotenv()
-    client = OpenAI(base_url=os.environ["LLM_API_URL"], api_key=os.environ["LLM_API_TOKEN"])
+    api_url = os.environ.get("LLM_API_URL", API_URL)
+    api_token = os.environ.get("LLM_API_TOKEN", API_TOKEN)
 
-    for model in args.models:
-        for typology in args.typologies:
-            for g in range(args.n_games):
-                t0 = time.time()
-                seed = hash((model, typology, g)) & 0xFFFFFFFF
-                initial_map = make_map(typology, n_rows=args.n_rows, n_cols=args.n_cols,
-                                        n_gold=args.n_gold, n_enemy=args.n_enemy, seed=seed)
-                print(f"\n=== {model}  ·  {typology}  (partie {g + 1}/{args.n_games}) ===")
-                result = run_simulation(client, model, initial_map, max_turns=args.max_turns)
-                path = save_run_log(model, typology, result, initial_map)
-                dt = time.time() - t0
-                print(f"-> {result['status']}  {result['score']}/{result['total_gold']} or  "
-                      f"en {result['turn']} tours  ({dt:.0f}s)  -> {path.name}")
+    print(f"[INFO] Connexion au serveur LLM : {api_url}")
+    # timeout allongé : on laisse le temps réel au modèle de réfléchir.
+    client = OpenAI(base_url=api_url, api_key=api_token, timeout=HTTP_TIMEOUT)
+
+    models = get_available_models(client)
+    print(f"[INFO] {len(models)} modèle(s) trouvé(s) : {models}")
+
+    if EXCLUDE_EMBEDDINGS:
+        models = [m for m in models if "embed" not in m.lower()]
+
+    if not models:
+        print("[ERREUR] Aucun modèle disponible. Vérifiez que LM Studio est démarré.")
+        return
+
+    print(f"[INFO] Modèles retenus pour le benchmark : {models}")
+
+    total_runs = (len(models) * len(TYPOLOGIES) * len(PROMPT_MODES)
+                  * len(TEMPERATURES) * N_GAMES)
+    print(f"[INFO] Grid de tests : {len(models)} modèles × {len(PROMPT_MODES)} prompts "
+          f"× {len(TEMPERATURES)} températures × {len(TYPOLOGIES)} typologies "
+          f"× {N_GAMES} parties = {total_runs} runs\n")
+
+    run_idx = 0
+    for model in models:
+        for typology in TYPOLOGIES:
+            for prompt_mode in PROMPT_MODES:
+                for temperature in TEMPERATURES:
+                    for g in range(N_GAMES):
+                        run_idx += 1
+                        t0 = time.time()
+                        seed = hash((model, typology, prompt_mode,
+                                     temperature, g)) & 0xFFFFFFFF
+                        initial_map = make_map(typology, n_rows=N_ROWS, n_cols=N_COLS,
+                                               n_gold=N_GOLD, n_enemy=N_ENEMY, seed=seed)
+                        print(f"\n=== [{run_idx}/{total_runs}] {model}  ·  {typology}  ·  "
+                              f"prompt={prompt_mode}  ·  T={temperature}  "
+                              f"(partie {g + 1}/{N_GAMES}) ===")
+                        result = run_simulation(client, model, initial_map,
+                                                prompt_mode=prompt_mode,
+                                                temperature=temperature,
+                                                max_turns=MAX_TURNS)
+                        path = save_run_log(model, typology, result, initial_map,
+                                            prompt_mode, temperature)
+                        dt = time.time() - t0
+                        print(f"-> {result['status']}  {result['score']}/{result['total_gold']} or  "
+                              f"en {result['turn']} tours  ({dt:.0f}s)  -> {path.name}")
+
+    print(f"\n[INFO] Benchmark terminé : {total_runs} runs sauvegardés dans {RUNS_DIR}/")
 
 
 if __name__ == "__main__":
