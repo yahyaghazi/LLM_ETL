@@ -1,0 +1,328 @@
+{
+  "model": "mistralai/ministral-3-3b",
+  "final_score": 0,
+  "total_gold": 6,
+  "turns_used": 30,
+  "status": "timeout",
+  "initial_map": [
+    [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      0,
+      0,
+      0,
+      3,
+      0,
+      2,
+      3,
+      2
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      2,
+      2,
+      0,
+      3,
+      1,
+      2
+    ]
+  ],
+  "optimal": {
+    "steps": 22,
+    "directions": [
+      "LEFT",
+      "UP",
+      "UP",
+      "UP",
+      "UP",
+      "RIGHT",
+      "UP",
+      "UP",
+      "LEFT",
+      "LEFT",
+      "DOWN",
+      "LEFT",
+      "DOWN",
+      "LEFT",
+      "LEFT",
+      "DOWN",
+      "DOWN",
+      "RIGHT",
+      "DOWN",
+      "LEFT",
+      "DOWN",
+      "LEFT"
+    ]
+  },
+  "decision_log": [
+    {
+      "turn": 1,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical (0 vs 1) pour atteindre l'or rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 2,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or actuel (DOWN) car il est plus grand que l'écart horizontal gauche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 3,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical (0 vs 1) pour atteindre l'or rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 4,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 5,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical (0 vs 2) pour atteindre l'or rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 6,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 7,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 8,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 9,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 10,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 11,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 12,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 13,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 14,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 15,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 16,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 17,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 18,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 19,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 20,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 21,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 22,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 23,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 24,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 25,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 26,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 27,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 28,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 29,
+      "direction": "UP",
+      "reason": "L'or vertical est à distance nulle, donc privilégier UP pour le capturer.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 30,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical vers l'or, même si horizontal est proche.",
+      "blocked": false,
+      "gold": false
+    }
+  ]
+}

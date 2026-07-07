@@ -1,0 +1,7 @@
+npc_benchmark:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../../data/npc.duckdb"
+      threads: 4

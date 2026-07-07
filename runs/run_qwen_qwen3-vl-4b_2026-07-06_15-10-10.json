@@ -1,0 +1,220 @@
+{
+  "model": "qwen/qwen3-vl-4b",
+  "final_score": 2,
+  "total_gold": 6,
+  "turns_used": 15,
+  "status": "timeout",
+  "initial_map": [
+    [
+      0,
+      0,
+      3,
+      0,
+      2,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      3,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      3
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      1,
+      0,
+      0,
+      0
+    ]
+  ],
+  "optimal": {
+    "steps": 19,
+    "directions": [
+      "UP",
+      "RIGHT",
+      "RIGHT",
+      "RIGHT",
+      "UP",
+      "UP",
+      "LEFT",
+      "LEFT",
+      "LEFT",
+      "LEFT",
+      "LEFT",
+      "LEFT",
+      "UP",
+      "LEFT",
+      "RIGHT",
+      "RIGHT",
+      "UP",
+      "UP",
+      "UP"
+    ]
+  },
+  "decision_log": [
+    {
+      "turn": 1,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le UP et 1 case vers la DROITE. Pour réduire le plus grand écart, je choisis d'aller vers le UP d'abord, puis vers la DROITE. Cela aligne la stratégie avec la consigne de réduire d'abord le plus grand écart, et évite de tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 2,
+      "direction": "RIGHT",
+      "reason": "L'or est à 1 case à droite. La priorité est de réduire l'écart horizontal, donc je choisis RIGHT.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 3,
+      "direction": "RIGHT",
+      "reason": "L'or est à 2 cases à droite, donc je vais aller vers la droite pour réduire l'écart horizontal. Cela correspond à la stratégie de réduire d'abord le plus grand écart, et cela ne me fait pas tourner en rond, car je suis déjà en train de progresser vers la cible.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 4,
+      "direction": "RIGHT",
+      "reason": "Le but est d'atteindre l'or, qui est à 1 case à droite. Le joueur est en train de se déplacer vers la droite (dernier coup : RIGHT), ce qui est cohérent avec l'objectif. Il ne faut pas revenir en arrière ou tourner en rond. La direction la plus logique est donc de continuer vers la droite.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 5,
+      "direction": "LEFT",
+      "reason": "Le but est d'atteindre l'or le plus proche. Il est à 2 cases vers le haut et 1 case vers la gauche. Mon dernier coup a été à droite, donc je dois réduire l'écart horizontal (gauche) avant le vertical (haut). Je choisis LEFT pour réduire l'écart horizontal.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 6,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases vers le haut, donc je dois d'abord réduire l'écart vertical. Les derniers coups ont été UP, RIGHT, RIGHT, RIGHT, LEFT — j'ai donc beaucoup déplacé vers la droite et à gauche, mais pas vers le haut. Il est clair que je dois aller vers le haut pour rapprocher mon objectif. Par conséquent, je choisis DOWN pour réduire l'écart vertical en m'éloignant du haut, puis je pourrai revenir vers le haut. En attendant, je choisis DOWN pour équilibrer la position.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 7,
+      "direction": "UP",
+      "reason": "L'or est à 3 cases vers le UP. Je dois réduire d'abord l'écart vertical. Mes derniers coups incluent des déplacements latéraux, donc je vais choisir 'UP' pour progresser directement vers l'or.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 8,
+      "direction": "?",
+      "reason": "(pas de decision LLM)",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 9,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases vers le haut, donc je dois aller vers le haut pour réduire l'écart vertical. J'ai déjà utilisé 'UP' récemment, mais comme la consigne dit de ne pas tourner en rond, je choisis de me déplacer vers le haut en priorité. Le chemin le plus direct est de descendre d'abord, puis de monter pour atteindre l'or, mais comme je ne peux pas aller en haut directement, je vais plutôt choisir 'DOWN' pour réduire l'écart vertical en attendant d'aller vers le haut plus tard.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 10,
+      "direction": "UP",
+      "reason": "L'or est à 3 cases vers le UP, donc la direction la plus logique est UP pour réduire l'écart vertical. Les autres directions (LEFT, RIGHT) ne rapprochent pas de l'or, et le joueur a déjà fait des mouvements vers UP récemment, donc il faut éviter de tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 11,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases vers le haut, et je suis actuellement en train de faire des mouvements qui incluent des déplacements vers le haut (UP). Comme je dois réduire d'abord le plus grand écart, je dois prioriser la direction verticale. Puisque je me suis déjà déplacé vers le haut, je devrais maintenant aller vers le bas pour réduire l'écart vertical, puis ajuster horizontalement. Cependant, la direction autorisée la plus logique pour réduire l'écart vertical est DOWN, car je suis en train de me rapprocher de l'or en y arrivant par des déplacements alternatifs. J'opte donc pour DOWN pour réduire l'écart vertical, puis ajuster horizontalement. La direction la plus logique est DOWN.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 12,
+      "direction": "UP",
+      "reason": "Le but est d'atteindre l'or le plus proche. Il se trouve à 3 cases vers le haut. Mon dernier mouvement a été vers le bas, donc je dois corriger cette orientation. Je dois donc aller vers le haut pour réduire l'écart vertical. En utilisant 'UP' maintenant, je me rapproche de l'or. Cela correspond à la consigne de réduire d'abord le plus grand écart, et de ne pas tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 13,
+      "direction": "UP",
+      "reason": "L'or est à 2 cases vers le UP, ce qui signifie que je dois réduire l'écart vertical. J'ai déjà fait 5 coups, dont 3 'UP' et 2 'DOWN', donc je suis en train de me rapprocher de l'or en altitude. Le fait de continuer vers le UP est cohérent avec la direction la plus proche, et il n'y a pas de raison de tourner en rond. Je vais donc choisir : UP.",
+      "blocked": true,
+      "gold": false
+    },
+    {
+      "turn": 14,
+      "direction": "DOWN",
+      "reason": "Le but est d'atteindre l'or. L'or est à 2 cases vers le UP, mais le dernier coup UP a été bloqué. Donc, je dois réduire l'écart vertical d'abord. Je suis actuellement en haut du mur, donc je dois aller vers le bas pour éviter de me bloquer. Je choisis DOWN.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 15,
+      "direction": "UP",
+      "reason": "L'or est à 3 cases vers le UP, donc la direction la plus logique est UP pour réduire l'écart vertical. Les coups précédents incluent des déplacements UP et DOWN, mais l'or est clairement en haut, donc UP est la meilleure option pour avancer vers lui.",
+      "blocked": false,
+      "gold": false
+    }
+  ]
+}

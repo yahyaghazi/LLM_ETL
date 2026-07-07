@@ -1,0 +1,20 @@
+name: 'npc_benchmark'
+version: '1.0.0'
+config-version: 2
+
+profile: 'npc_benchmark'
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  npc_benchmark:
+    staging:
+      +materialized: view
+      +schema: silver
+    marts:
+      +materialized: table
+      +schema: gold

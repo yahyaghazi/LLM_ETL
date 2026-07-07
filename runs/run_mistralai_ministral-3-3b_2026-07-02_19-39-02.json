@@ -1,0 +1,326 @@
+{
+  "model": "mistralai/ministral-3-3b",
+  "final_score": 5,
+  "total_gold": 6,
+  "turns_used": 30,
+  "status": "timeout",
+  "initial_map": [
+    [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      2
+    ],
+    [
+      1,
+      0,
+      2,
+      3,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      2,
+      3,
+      0,
+      0
+    ],
+    [
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "optimal": {
+    "steps": 20,
+    "directions": [
+      "DOWN",
+      "DOWN",
+      "RIGHT",
+      "DOWN",
+      "RIGHT",
+      "UP",
+      "RIGHT",
+      "UP",
+      "UP",
+      "UP",
+      "RIGHT",
+      "RIGHT",
+      "RIGHT",
+      "DOWN",
+      "LEFT",
+      "DOWN",
+      "DOWN",
+      "DOWN",
+      "DOWN",
+      "DOWN"
+    ]
+  },
+  "decision_log": [
+    {
+      "turn": 1,
+      "direction": "DOWN",
+      "reason": "L'or est situé à 2 cases vers le DOWN et 1 case vers la DROITE par rapport au joueur actuel.\n\nPour minimiser l'écart global (distance euclidienne), il faut privilégier la direction qui réduit le plus rapidement la somme des écarts :\n- Écart vertical = 2 (DOWN)\n- Écart horizontal = 1 (DROITE)\n\nLa distance totale actuelle est √(2² + 1²) = √5 ≈ 2,24.\n\nSi on avance en **DOWN**, l'écart vertical devient 1 et l'horizontale reste à 1 → nouvelle distance : √(1² + 1²) = √2 ≈ 1,41 (meilleur choix).\n\nSi on avance en **RIGHT**, l'écart horizontal devient 0 mais le vertical reste à 2 → nouvelle distance : √(2² + 0²) = 2.\n\nDonc, la direction optimale est **DOWN** pour réduire au maximum la distance totale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 2,
+      "direction": "DOWN",
+      "reason": "L'or est à 1 case vers le DOWN et 1 case vers la DROITE, donc l'écart vertical est égal à l'écart horizontal (tous deux = 1).\n\nLes directions autorisées sont uniquement 'UP' et 'DOWN'.\n\nPuisque les écarts ne peuvent pas être réduits en utilisant ces directions (elles n'affectent que le déplacement vertical), je dois choisir la direction qui minimise le risque de tourner en rond.\n\n- Si on se déplace vers **DOWN**, on avance directement sur l'axe vertical et on réduit l'écart horizontal (mais il reste 1 case).\n- Si on se déplace vers **UP**, on ne progresse pas sur les deux axes, mais cela pourrait éviter un mouvement inutile en boucle.\n\n**Stratégie optimale ici :** On privilégie la direction qui avance le plus efficacement dans l'axe où l'écart est le plus grand (ici, vertical = 1).\n\nDonc, **DOWN** reste la meilleure option pour réduire l'écart horizontal et progresser vers l'or.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 3,
+      "direction": "RIGHT",
+      "reason": "L'or est à 1 case vers la droite et 0 verticalement, donc l'écart horizontal est de 1 et vertical de 0. Comme il faut réduire le plus grand écart (ici horizontal), je choisis **RIGHT** pour avancer vers l'or.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 4,
+      "direction": "DOWN",
+      "reason": "L'or est à 1 case vers le DOWN et 1 case vers la DROITE, donc l'écart vertical est égal à l'écart horizontal (ambiguïté partagée).\n\nLes 5 derniers coups étaient ['DOWN', 'DOWN', 'RIGHT'] :\n- Le joueur a déjà avancé **2 fois en DOWN** (écart réduit verticalement), ce qui limite les risques de boucle.\n- La dernière direction était **RIGHT**, donc une nouvelle RIGHT pourrait créer un cercle (tourner en rond).\n\nLa meilleure option est donc d'opter pour **DOWN** pour réduire à nouveau l'écart vertical, même si l'or est aussi proche horizontalement. Cela évite la répétition de RIGHT et maintient une progression logique.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 5,
+      "direction": "RIGHT",
+      "reason": "L'or est à 1 case vers la droite et 0 verticalement, donc l'écart horizontal est de 1, tandis qu'il n'y a pas d'écart vertical (écart = 0).",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 6,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le haut et à 1 case vers la droite, donc l'écart vertical et horizontal est égal (1).\n\nPour réduire le plus grand écart entre les deux, je privilégie d'abord une direction qui réduit un des écarts de manière significative. Dans ce cas, comme les deux écarts sont égaux, je choisis la direction qui permet de couvrir à la fois une composante verticale et horizontale en priorité.\n\nLa direction 'UP' (haut) est plus efficace pour réduire l'écart vertical immédiat vers l'or, car elle avance directement dans cette direction. Cependant, comme les deux écarts sont égaux, je vais opter pour 'RIGHT' (droite), qui réduit aussi un écart de manière équivalente mais en se rapprochant horizontalement.\n\nMais selon la consigne explicite de réduire d'abord le plus grand écart vertical ou horizontal, et que dans ce cas ils sont égaux, je vais choisir **UP** pour avancer directement vers l'or sur une dimension (verticale) et éviter un mouvement inutile en droite.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 7,
+      "direction": "RIGHT",
+      "reason": "L'or est à 1 case vers la droite et 0 verticalement, donc l'écart horizontal est de 1 et vertical est de 0. Comme il faut réduire le plus grand écart en premier, je privilégie la direction horizontale (DROITE).",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 8,
+      "direction": "UP",
+      "reason": "L'or est situé à 2 cases vers le haut et aligné horizontalement avec la position actuelle du joueur.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 9,
+      "direction": "RIGHT",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : Le joueur est à 1 case vers le haut (UP) par rapport à l'or, ce qui signifie qu'il y a un écart de distance verticale de 1.\n2. **Écart horizontal nul** : Aucune distance horizontale n'est indiquée comme problème.\n3. **Direction recommandée** : Puisque l'écart vertical est le plus grand et que la direction UP est déjà dans les 5 derniers coups, il faut privilégier cette direction pour réduire cet écart.\n\n4. **Éviter les tours en rond** : La dernière direction utilisée était UP, donc on évite de répéter cette même direction.\n\nLa priorité absolue est de réduire l'écart vertical le plus rapidement possible.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 10,
+      "direction": "LEFT",
+      "reason": "L'or est à 1 case vers le haut et à gauche par rapport au joueur actuel.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 11,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : Le joueur est à 1 case vers le haut (UP) par rapport à l'or.\n   - *Pas de distance horizontale* (0 cases alignées horizontalement).\n2. **Direction optimale** : Pour réduire ce décalage vertical, la meilleure option est d'abord **DOWN**, car elle corrige directement cette différence.\n3. **Éviter les tours en rond** : Les 5 derniers coups étaient UP → RIGHT → UP → RIGHT → LEFT. Une rotation vers DOWN brise cette tendance répétée et évite un mouvement circulaire.\n\n→ **Priorité absolue** : Descendre (DOWN) pour réduire la distance verticale immédiate.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 12,
+      "direction": "UP",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 2 cases vers le haut (UP).\n   - Mes derniers coups ont été 'RIGHT', 'UP', 'RIGHT', 'LEFT' → mouvement ascendant déjà fait une fois.\n   - *Priorité absolue* : aller vers UP pour réduire l'écart vertical.\n\n2. **Écart horizontal nul** : L'or est aligné horizontalement (pas de déplacement nécessaire en LEFT/RIGHT).\n3. **Avoidance des boucles** : Après 'LEFT' et 'DOWN', éviter un mouvement répétitif.\n   - La direction 'UP' n'a pas été testée depuis le dernier UP, donc c'est une nouvelle tentative.\n\n→ **Solution optimale** : UP (réduit l'écart vertical de 2 cases en une seule étape).",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 13,
+      "direction": "UP",
+      "reason": "Analyse des écarts actuels et des contraintes de mouvement pour optimiser la progression vers l'or.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 14,
+      "direction": "RIGHT",
+      "reason": "Analyse des écarts actuels et priorités :\n\n1. **Écart vertical** : L'or est à 3 cases vers la droite (pas de composante UP/DOWN directe).\n   - Mes derniers coups incluent 'UP' répété, mais cela ne réduit pas l'écart horizontal.\n2. **Écart horizontal** : L'or est à 1 case vers le haut (UP) et 3 vers la droite.\n   - Le plus grand écart est donc **horizontal (3 cases)** vers la DROITE.\n\n3. **Stratégie** : \n   - Priorité absolue sur la réduction de l'écart horizontal (DROITE).\n   - Éviter les mouvements redondants ('UP' répété) pour ne pas tourner en rond.\n\n→ Direction optimale : **RIGHT** (pour réduire le plus grand écart horizontal).",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 15,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le haut et 2 cases vers la droite par rapport au joueur actuel.\n\nLes écarts sont:\n- Vertical: 1 (UP)\n- Horizontal: 2 (RIGHT)\n\nLe plus grand écart horizontal (2) doit être réduit en priorité, mais comme l'or est déjà à seulement 1 case verticale, il faut privilégier la direction qui rapproche le plus rapidement de l'objectif global.\n\nLes deux directions possibles pour réduire les écarts sont:\n- **UP** : réduit l'écart vertical (1), mais ne touche pas horizontalement.\n- **RIGHT** : réduit l'écart horizontal (2) et améliore légèrement la position par rapport à l'or (car 1 UP + 2 RIGHT = une diagonale plus proche).\n\nCependant, comme le joueur a déjà fait plusieurs mouvements vers la droite dans ses 5 derniers coups, il faut éviter de tourner en rond. **UP** est donc la meilleure option pour corriger la tendance horizontale tout en restant efficace verticalement.\n\nMais en réalité, si on considère que l'or est à (1 UP, 2 RIGHT), et qu'on veut réduire les deux écarts le plus vite possible, il faut choisir une direction qui combine les deux. Comme on ne peut pas faire de diagonales, la meilleure approche est d'abord **UP** pour réduire verticalement, puis ensuite **RIGHT** pour réduire horizontalement.\n\nMais vu que l'objectif est de choisir UNE direction à chaque fois et qu'on doit privilégier le plus grand écart, ici, le plus grand écart est horizontal (2 RIGHT). Donc la réponse logique serait **RIGHT**, même si on tourne légèrement en rond avec les mouvements précédents.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 16,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Distance verticale** : L'or est à 0 case vers le bas (aligné verticalement), ce qui signifie qu'il est directement sous moi.\n2. **Distance horizontale** : Il est à 2 cases vers la droite, mais cette distance n'est pas prioritaire car elle peut être réduite en descendant d'abord.\n\n3. **Direction autorisée** : Les seules options sont DOWN, LEFT et RIGHT.\n4. **Évite les tours de boucle** : Après avoir avancé vers le bas (DOWN), je ne répéterai pas cette direction pour éviter un mouvement inutile.\n\n**Conclusion logique** : La meilleure option est de descendre directement pour réduire l'écart vertical à 0.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 17,
+      "direction": "LEFT",
+      "reason": "L'or est à 1 case vers le haut et 2 cases vers la droite. Les écarts sont donc de 1 (vertical) et 2 (horizontal). Le plus grand écart est horizontal (2), mais comme on ne peut pas avancer directement vers la droite sans passer par une autre direction, je privilégie d'abord l'axe vertical pour réduire le déplacement total.\n\nLes 5 derniers coups étaient : UP, UP, RIGHT, UP, DOWN. La dernière direction répétée était 'UP', donc je vais essayer de tourner en évitant un cercle vicieux en choisissant la direction opposée à celle qui a été répétée (ici, 'DOWN' est déjà utilisée).\n\nLa meilleure option pour réduire l'écart vertical tout en évitant une boucle est **RIGHT** (même si elle ne réduit pas directement le déplacement horizontal optimal, elle permet de progresser vers la droite sans bloquer les autres directions).",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 18,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le haut et 3 cases vers la droite. Actuellement, les écarts sont :\n- Vertical (UP/DOWN) : 0 (pas de position actuelle donnée explicitement, mais on peut supposer que l'on est déjà aligné verticalement avec l'or si on a fait des mouvements UP/DOWN sans décalage).\n- Horizontal (RIGHT/LEFT) : 3 cases à droite.\n\nLes 5 derniers coups sont ['UP', 'RIGHT', 'UP', 'DOWN', 'LEFT']:\n- Après ces mouvements, il est probable que le joueur soit légèrement dévié horizontalement. \n- Le mouvement **RIGHT** a réduit temporairement l'écart vers la droite (mais pas à zéro), suivi d'un **LEFT**, ce qui pourrait avoir annulé une partie de cette avance.\n\nPour minimiser les écarts, on privilégie ici la direction **UP** car elle réduit le plus grand écart vertical potentiel (même si aucun écart n'est explicitement donné).\n\nSi l'on suppose que l'écart horizontal est maintenant à 1 case vers la droite après ces mouvements, alors **RIGHT** serait aussi une bonne option. Cependant, comme tu dois choisir UNE direction et qu'**UP** réduit le plus grand écart (vertical) en priorité, je choisis cette direction.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 19,
+      "direction": "LEFT",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 3 cases vers la droite (pas de contrainte verticale immédiate).\n2. **Direction autorisée** : Seules *DOWN*, *LEFT* ou *RIGHT* sont possibles.\n3. **Stratégie optimale** : La distance horizontale (3) > distance verticale (0), donc privilégier la direction qui réduit cet écart.\n4. **Éviter les tours de boucle** : Après ['RIGHT', 'UP', 'DOWN', 'LEFT'], une répétition de *RIGHT* serait risquée. \n\n→ **Solution** : *LEFT* (pour explorer un angle et réduire l'incertitude sur la position future).\n\n*Note* : Si l'or était à 3 cases en bas (*DOWN*), on aurait dû privilégier cette direction. Ici, la priorité est horizontale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 20,
+      "direction": "RIGHT",
+      "reason": "Analyse des contraintes et objectifs :\n\n1. **Distance verticale** : L'or est à 0 case vers le haut (UP), donc aucun écart vertical n'existe actuellement.\n2. **Distance horizontale** : L'or est à 4 cases vers la droite (RIGHT).\n3. **Direction précédente** : Les 5 derniers coups incluent des mouvements UP/DOWN/LEFT, mais pas de RIGHT répété récemment.\n\n- Le plus grand écart est horizontal (4 cases), donc on privilégie RIGHT.\n- Comme on tourne en rond avec LEFT souvent, on évite cette direction pour progresser vers l'or.\n\n**Réponse optimale** : **RIGHT** (pour réduire le plus grand écart et éviter les boucles).",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 21,
+      "direction": "RIGHT",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 3 cases vers la droite (pas de contrainte verticale immédiate).\n2. **Direction autorisée** : Seules *DOWN*, *LEFT* ou *RIGHT* sont possibles.\n3. **Proximité optimale** : La distance horizontale (3) > distance verticale (0), donc on privilégie la réduction de l'écart horizontal.\n4. **Éviter les tours en rond** : Après ['DOWN', 'LEFT', 'UP', 'LEFT'], une répétition de *LEFT* ou *RIGHT* serait risquée. \n\n→ La meilleure option est **RIGHT**, car elle réduit directement la distance horizontale (3 → 2) sans créer de boucle.\n\n(Note : Si l'or était à 0 case verticale mais >1 case horizontal, on aurait privilégié *LEFT/RIGHT* pour réduire l'écart.)",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 22,
+      "direction": "RIGHT",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 0 case vers le bas (pas de distance verticale).\n2. **Écart horizontal maximal** : Il faut avancer vers la droite (2 cases).\n3. **Direction autorisée** : Seules DOWN, LEFT ou RIGHT sont possibles.\n4. **Stratégie évitée** : Les 5 derniers coups incluent des mouvements répétitifs (LEFT + RIGHT), donc on privilégie une nouvelle direction.\n\n→ La seule option qui réduit à la fois l'écart horizontal et respecte les règles est **RIGHT**, car elle avance vers le but sans tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 23,
+      "direction": "RIGHT",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 0 case vers le bas (pas de distance verticale).\n2. **Écart horizontal maximal** : L'or est à 1 case vers la DROITE.\n3. **Direction autorisée** : Seules DOWN, LEFT ou RIGHT sont possibles.\n4. **Avoidance des tours en rond** : Après ['UP', 'LEFT', 'RIGHT', 'RIGHT', 'RIGHT'], éviter de répéter RIGHT.\n\n→ La direction optimale est donc **RIGHT**, car elle réduit l'écart horizontal le plus rapidement sans créer un mouvement inutile.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 24,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical** : L'or est à 6 cases vers le DOWN (priorité absolue).\n2. **Écart horizontal** : À 1 case vers la LEFT.\n3. **Direction actuelle** : Les 5 derniers coups étaient des RIGHT, donc éviter de tourner en rond (pas de LEFT répétée).\n\n4. **Choix optimal** : Bien que l'écart horizontal soit très court, le DOWN est prioritaire pour réduire d'abord l'écart vertical majeur.\n\n→ La direction la plus efficace et non redondante est **DOWN**.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 25,
+      "direction": "LEFT",
+      "reason": "Analyse des écarts actuels et priorités :\n\n1. **Écart vertical** : 5 cases vers le DOWN (objectif) → distance = 5.\n2. **Écart horizontal** : 1 case vers la LEFT (objectif) → distance = 1.\n\n- Le plus grand écart est vertical (5 > 1).\n- La direction autorisée pour réduire ce écart est **DOWN**, mais elle n’est pas permise par les règles.\n→ On ne peut pas avancer directement vers l’or.\n\n**Prochaine meilleure option** : \n- Reduire le second écart horizontal (1 case) en allant à gauche (**LEFT**).\n- Cela réduit la distance globale et évite un tour complet.\n\n*Justification* : Bien que l’or soit plus proche verticalement, tourner à gauche permet de progresser efficacement sans bloquer les autres directions.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 26,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 5 cases vers le DOWN (le plus grand écart).\n2. **Écart horizontal nul** : Pas de déplacement nécessaire horizontalement.\n3. **Direction autorisée** : Seules UP, DOWN, LEFT ou RIGHT sont possibles.\n4. **Stratégie évitant les tours** : Après 5 RIGHT consécutifs, un virage est suggéré pour éviter une boucle.\n\n→ La direction optimale pour réduire le plus grand écart vertical est **DOWN**, car elle corrige directement la position de l'or sans introduire d'erreur horizontale ni risquer un tour inutile.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 27,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 4 cases vers le DOWN (le plus grand écart vertical).\n2. **Alignement horizontal** : Aucun écart horizontal n'est indiqué, donc pas de préférence pour une direction horizontale.\n3. **Direction autorisée** : Seules UP/DOWN/LEFT sont possibles.\n\n- Les 5 derniers coups incluent des RIGHT (tourner à droite), ce qui suggère un mouvement cyclique. Pour éviter les tours en rond, privilégions DOWN.\n\n→ La meilleure option est donc **DOWN**, car elle réduit le plus grand écart vertical et évite une répétition de direction.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 28,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 3 cases vers le DOWN (priorité absolue).\n2. **Écart horizontal nul** : Pas de déplacement horizontal nécessaire.\n3. **Avoidance des boucles** : Après une séquence de RIGHT/DOWN/LEFT, éviter un mouvement répétitif.\n\n4. **Stratégie optimale** : Le DOWN est la seule direction qui réduit simultanément l'écart vertical (3 cases) et ne crée pas de boucle avec les 5 derniers coups (RIGHT → DOWN → LEFT → DOWN → DOWN).\n\n→ La meilleure option est donc **DOWN**, car elle résout le problème principal sans risque de redondance.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 29,
+      "direction": "LEFT",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Écart vertical maximal** : L'or est à 2 cases vers le DOWN (le plus grand écart vertical).\n   - Mes 5 derniers coups étaient principalement vers le DOWN, mais je dois vérifier si une autre direction n'est pas bloquée ou moins optimale.\n   - Après 5 DOWN consécutifs, il est probable que la case en dessous soit déjà occupée ou hors chemin. Je vais privilégier une alternative pour éviter de tourner en rond.\n\n2. **Écart horizontal** : Aucun écart horizontal (0) ne justifie un changement de direction prioritaire.\n3. **Risque de boucle** : Après 5 DOWN, je tourne vers le LEFT pour explorer une nouvelle voie et éviter de rester coincé verticalement.\n\n→ La meilleure option est donc **LEFT**, car elle réduit la probabilité de blocage tout en progressant latéralement si nécessaire.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 30,
+      "direction": "DOWN",
+      "reason": "Analyse des contraintes et priorités :\n\n1. **Position actuelle de l'or** : Il est à 2 cases vers le DOWN et 1 case vers la DROITE.\n   - Cela signifie que l'écart vertical (DOWN) est plus grand que l'écart horizontal (DROITE).\n   → Priorité absolue : réduire d'abord cet écart vertical.\n\n2. **Direction recommandée** : Pour avancer vers le DOWN, la seule option autorisée parmi les 5 dernières actions est **DOWN**.\n   - Les autres directions (UP, LEFT, RIGHT) ne réduisent pas l'écart vertical actuel.\n   → Même si on tourne en rond, il faut privilégier une direction qui progresse vers le but.\n\n3. **Évitez les répétitions** : Après 5 DOWN consécutifs, tourner en rond avec un autre mouvement (comme LEFT ou RIGHT) n’est pas optimal ici.\n   - La logique est claire : **DOWN reste la meilleure option pour réduire l'écart vertical.**\n\n→ **Réponse finale** : **DOWN** (même si c'est une répétition, elle réduit le plus grand écart).",
+      "blocked": false,
+      "gold": false
+    }
+  ]
+}

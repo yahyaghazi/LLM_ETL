@@ -1,0 +1,225 @@
+{
+  "model": "qwen/qwen3-vl-4b",
+  "final_score": 1,
+  "total_gold": 6,
+  "turns_used": 15,
+  "status": "timeout",
+  "initial_map": [
+    [
+      0,
+      0,
+      2,
+      3,
+      0,
+      0,
+      2,
+      2
+    ],
+    [
+      0,
+      0,
+      3,
+      2,
+      0,
+      3,
+      0,
+      3
+    ],
+    [
+      0,
+      2,
+      1,
+      3,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "optimal": {
+    "steps": 24,
+    "directions": [
+      "UP",
+      "DOWN",
+      "RIGHT",
+      "RIGHT",
+      "UP",
+      "UP",
+      "LEFT",
+      "RIGHT",
+      "DOWN",
+      "RIGHT",
+      "RIGHT",
+      "RIGHT",
+      "DOWN",
+      "LEFT",
+      "LEFT",
+      "LEFT",
+      "LEFT",
+      "DOWN",
+      "DOWN",
+      "DOWN",
+      "DOWN",
+      "DOWN",
+      "LEFT",
+      "LEFT"
+    ]
+  },
+  "decision_log": [
+    {
+      "turn": 1,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le UP, et il n'y a pas d'écart horizontal. Il est plus logique de se rapprocher en montant, donc je choisis UP.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 2,
+      "direction": "LEFT",
+      "reason": "L'or est à 1 case vers le UP et 1 case vers la DROITE. J'ai déjà fait un coup 'UP', donc je suis en train de réduire l'écart vertical. La prochaine étape doit être de réduire l'écart horizontal, donc je choisis 'LEFT'. Cela me rapproche de l'or en réduisant l'écart horizontal, même si je suis en train de réduire l'écart vertical, ce qui est cohérent avec la consigne de réduire d'abord le plus grand écart. En outre, je choisis une direction qui n'est pas la même que d'habitude pour éviter de tourner en rond (je ne fais pas de 'UP' à nouveau).",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 3,
+      "direction": "UP",
+      "reason": "J'ai fait 2 coups : UP puis LEFT. Le but est d'atteindre l'or le plus proche. L'or est à 1 case UP et 2 cases RIGHT. Je dois d'abord réduire l'écart vertical (UP), puis je peux corriger l'horizontal. Donc je choisis UP pour réduire le plus grand écart.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 4,
+      "direction": "?",
+      "reason": "(pas de decision LLM)",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 5,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases à droite, donc je dois me déplacer vers la droite pour réduire l'écart horizontal. Cependant, la direction autorisée est 'LEFT', donc je dois choisir la direction verticale pour réduire l'écart vertical. Les derniers coups ont été 'UP', 'LEFT', 'UP', donc je ne tourne pas en rond. La direction 'DOWN' réduit l'écart vertical (actuel : 0) et est autorisée, donc je choisis 'DOWN'.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 6,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le UP et 2 cases vers la DROITE. Les 5 derniers coups ont été : UP, LEFT, UP, DOWN. Le dernier coup (DOWN) a été un déplacement vertical, ce qui a augmenté l'écart vertical. Pour réduire l'écart le plus grand, je dois prioriser la direction qui réduit l'écart vertical, c'est-à-dire 'UP'. Cela me rapproche de l'or en réduisant l'écart vertical de 1 case, et je peux ensuite ajuster horizontalement. En outre, je ne tourne pas en rond, car je suis encore à 1 case en dessous de l'or verticalement. Je choisis 'UP'.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 7,
+      "direction": "RIGHT",
+      "reason": "L'or est à 2 cases à droite, donc il faut avancer vers la droite pour réduire l'écart horizontal. Malgré les derniers coups vers le haut et la gauche, la direction la plus logique est de se déplacer vers la droite, même si ce n'est pas la direction habituelle, pour éviter de tourner en rond.",
+      "blocked": true,
+      "gold": false
+    },
+    {
+      "turn": 8,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases à droite, mais le dernier coup à droite a été bloqué. Le mouvement vers la droite est donc impossible. Il faut donc choisir 'DOWN' pour réduire l'écart vertical (le plus grand ecart actuel), puis réorienter vers la droite si possible. Puisque la direction 'LEFT' est autorisée et permettrait de réduire l'écart horizontal (le plus proche de l'or), mais l'or est à droite, il est plus logique de choisir 'DOWN' pour réduire l'écart vertical (plus grand) et ensuite orienter vers la droite. Mais puisque la direction 'RIGHT' est bloquée, la seule direction disponible est 'DOWN'.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 9,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le UP et 2 cases vers la DROITE. Le plus grand écart est vertical (1 case UP), donc je dois d'abord aller vers le UP pour réduire cet écart. Cela me ramène plus près de la cible, et après, je peux ajuster horizontalement. C'est une stratégie cohérente avec la consigne de réduire d'abord le plus grand écart.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 10,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases à droite, mais je ne peux pas aller à droite. Je dois réduire l'écart vertical d'abord. Mon dernier coup a été 'UP', donc je suis en haut. Je dois aller vers le bas pour progresser.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 11,
+      "direction": "RIGHT",
+      "reason": "L'or est à 1 case vers le UP et 2 cases vers la DROITE. Les 5 derniers coups ont été : UP, RIGHT, DOWN, UP, DOWN. Le mouvement vertical est déjà partiellement traité (UP puis DOWN). Pour réduire l'écart horizontal (2 cases à droite), il est plus efficace de se déplacer vers la DROITE, car cela réduit directement la distance horizontale. Ensuite, on pourra ajuster verticalement. C'est une direction non habituelle dans ce contexte, ce qui respecte la consigne de ne pas tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 12,
+      "direction": "?",
+      "reason": "(pas de decision LLM)",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 13,
+      "direction": "LEFT",
+      "reason": "L'or est à 1 case vers le UP et 1 case vers la DROITE. Mon objectif est de réduire l'écart le plus grand d'abord. L'écart vertical est de 1 case (vers le haut), donc je dois aller vers le haut. Cependant, la direction autorisée est 'DOWN' ou 'LEFT'. Je ne peux pas aller vers le haut. Donc je dois réduire l'écart horizontal. J'ai déjà fait 'RIGHT' récemment, donc je choisis 'LEFT' pour éviter de tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 14,
+      "direction": "UP",
+      "reason": "L'or est à 1 case vers le UP et 2 cases vers la DROITE. Les derniers coups montrent un déplacement alternatif, donc je dois réduire d'abord l'écart vertical (UP), puis je peux ajuster horizontalement. Je choisis 'UP' pour réduire l'écart vertical le plus grand, ce qui est cohérent avec la stratégie de réduction progressive et d'éviter de tourner en rond.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 15,
+      "direction": "DOWN",
+      "reason": "L'or est à 2 cases à droite, mais je ne peux pas aller à droite. J'ai déjà utilisé 'RIGHT' récemment, donc je dois éviter de tourner en rond. Le seul choix viable est 'DOWN', car c'est la seule direction autorisée et permettra de réduire l'écart vertical (même s'il est actuellement nul). Cela me permet de progresser vers la cible sans tourner en rond, en respectant la consigne.",
+      "blocked": false,
+      "gold": false
+    }
+  ]
+}

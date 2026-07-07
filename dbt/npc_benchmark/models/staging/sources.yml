@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: bronze
+    meta:
+      external_location: "../../data/bronze/{name}.parquet"
+    tables:
+      - name: runs
+        description: Une ligne par run de simulation (métadonnées, carte initiale, solution optimale).
+      - name: decisions
+        description: Une ligne par tour joué par le LLM (decision_log aplati).
+      - name: comparisons
+        description: Comparaison tour par tour du coup du LLM avec le coup optimal (BFS+TSP, npc_solver).

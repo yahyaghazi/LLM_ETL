@@ -1,0 +1,321 @@
+{
+  "model": "mistralai/ministral-3-3b",
+  "final_score": 1,
+  "total_gold": 6,
+  "turns_used": 30,
+  "status": "timeout",
+  "initial_map": [
+    [
+      3,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      0,
+      0,
+      0,
+      3,
+      3,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    [
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  ],
+  "optimal": {
+    "steps": 15,
+    "directions": [
+      "UP",
+      "UP",
+      "DOWN",
+      "DOWN",
+      "DOWN",
+      "RIGHT",
+      "RIGHT",
+      "UP",
+      "UP",
+      "RIGHT",
+      "RIGHT",
+      "RIGHT",
+      "RIGHT",
+      "DOWN",
+      "RIGHT"
+    ]
+  },
+  "decision_log": [
+    {
+      "turn": 1,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical maximal avec l'or actuel. Mouvement vers le haut pour rapprocher.",
+      "blocked": false,
+      "gold": true
+    },
+    {
+      "turn": 2,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical vers DOWN.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 3,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical maximal avec l'or actuel. Pas d'avancée horizontale inutile.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 4,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical maximal avec l'or actuel. Mouvement vers le bas pour approcher l'or en ligne +1.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 5,
+      "direction": "RIGHT",
+      "reason": "L'or est à droite et légèrement en bas, donc RIGHT réduit mieux l'écart vertical actuel.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 6,
+      "direction": "DOWN",
+      "reason": "Priorité à réduire l'écart vertical (DOWN) pour atteindre l'or proche, même si horizontal est légèrement moins avancé.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 7,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour approcher rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 8,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical vers l'or supérieur (UP) pour maximiser la proximité globale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 9,
+      "direction": "DOWN",
+      "reason": "Réduire verticalement l'écart maximal vers l'or actuel (DOWN), malgré la position horizontale légèrement moins optimale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 10,
+      "direction": "DOWN",
+      "reason": "L’or vertical est à distance égale mais privilégie la direction DOWN pour réduire l’écart global avec les ors horizontaux restants.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 11,
+      "direction": "UP",
+      "reason": "Maximiser la réduction du écart vertical (UP) pour atteindre l’or proche rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 12,
+      "direction": "DOWN",
+      "reason": "L’or vertical est à distance égale mais privilégie la direction DOWN pour réduire l’écart maximal global.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 13,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical (UP) pour atteindre l'or proche, puis minimiser horizontalement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 14,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical (UP) pour atteindre l'or proche, malgré un léger écart horizontal.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 15,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour aligner la ligne.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 16,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical (UP) pour atteindre l'or proche, puis éviter de bloquer la droite.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 17,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour converger rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 18,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical vers l'or supérieur (UP) pour minimiser la distance totale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 19,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour minimiser la distance totale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 20,
+      "direction": "DOWN",
+      "reason": "L’or vertical est à distance égale mais privilégie la descente pour réduire l’écart horizontal maximal.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 21,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical (UP) pour atteindre l'or proche, puis minimiser horizontalement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 22,
+      "direction": "DOWN",
+      "reason": "L’or vertical est à distance égale mais privilégie la direction DOWN pour réduire l’écart maximal global.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 23,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical (UP) pour atteindre l'or proche, puis minimiser horizontalement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 24,
+      "direction": "UP",
+      "reason": "Priorité à réduire l'écart vertical (UP) pour atteindre l'or proche, malgré un léger écart horizontal.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 25,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour aligner la ligne.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 26,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical (UP) pour atteindre l'or proche, puis éviter de bloquer la droite.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 27,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour converger rapidement.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 28,
+      "direction": "UP",
+      "reason": "Réduire d'abord l'écart vertical vers l'or supérieur (UP) pour minimiser la distance totale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 29,
+      "direction": "DOWN",
+      "reason": "L’or est à droite et légèrement en bas, réduisons d’abord l’écart vertical pour minimiser la distance totale.",
+      "blocked": false,
+      "gold": false
+    },
+    {
+      "turn": 30,
+      "direction": "DOWN",
+      "reason": "L’or vertical est à distance égale mais privilégie la descente pour réduire l’écart horizontal maximal.",
+      "blocked": false,
+      "gold": false
+    }
+  ]
+}
